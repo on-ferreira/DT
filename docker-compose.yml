@@ -27,7 +27,7 @@ services:
 
     depends_on:
       - db-DT
-    container_name: Manager
+    container_name: manager
 
   collector:
     build:
@@ -42,53 +42,9 @@ services:
       - ./data/web:/vol/web
     environment:
       TZ: "America/Sao_Paulo"
-      URL_MANAGER: "${URL_MANAGER}"
+      URL_MANAGER: "http://manager:5095"
       PYTHONUNBUFFERED: 1
     depends_on:
       - db-DT
       - Manager
-    container_name: Collector
-
-
-
-  sintese:
-    image: sintese
-    build:
-      context: ./
-      dockerfile: sintese/Dockerfile
-    command: ./run_create_admin.sh
-    environment:
-      TZ: "America/Sao_Paulo"
-      URL_ANALISE: "${URL_ANALISE}"
-      VUE_APP_URL: "${VUE_APP_MONITOR_URL}"
-      PYTHONUNBUFFERED: 1
-    restart: always
-    ports:
-      - "5000:5000"
-    depends_on:
-      - db
-    container_name: sintese
-
-
-
-  consulta_rto:
-    image: consulta_rto
-    container_name: consulta_rto
-    build:
-      context: consulta_rto
-      dockerfile: Dockerfile
-
-    command: ./roda_simulador.sh
-    environment:
-      TZ: "America/Sao_Paulo"
-      URL_SINTESE: "${URL_SINTESE}"
-      PYTHONUNBUFFERED: 1
-    restart: always
-    ports:
-      - "5004:5000"
-    depends_on:
-      - populabanco_rto
-      - sintese
-    extra_hosts:
-      - "localhost:192.168.5.94"
-
+    container_name: collector

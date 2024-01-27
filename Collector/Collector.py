@@ -3,11 +3,12 @@ from urllib import response
 import requests
 import threading
 import time
+import os
 from DT.Common import MonitoringProject
 
 
 class Collector:
-    def __init__(self, global_count=0, manager_url="http://manager-container:5000"):
+    def __init__(self, global_count=0):
         """
         Constructor for the Collector class.
 
@@ -17,7 +18,8 @@ class Collector:
         """
         self.project_list = []  # Initialize an empty list
         self.global_count = global_count
-        self.manager_url = manager_url
+        self.manager_url = os.getenv("URL_MANAGER", "http://manager:5095")
+
 
         # Call get_project_list to initialize the project_list within the max of 10 retries.
         max_retries = 10

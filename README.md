@@ -14,13 +14,13 @@ Certifique-se de ter o Docker e o Docker Compose instalados em sua máquina ante
 1. Clone este repositório para o seu ambiente local:
 
    ```bash
-   git clone https://github.com/on-ferreira/DTsistemas.git
+   git clone https://github.com/on-ferreira/DT.git
    ```
 
 2. Navegue até o diretório do projeto:
 
    ```bash
-   cd DTsistemas
+   cd DT
    ```
 
 3. Execute o seguinte comando para iniciar os containers do Docker:
@@ -33,4 +33,4 @@ Este comando irá construir as imagens necessárias e iniciar dois containers: u
 
 ## Acesso ao Projeto:
 
-Após a conclusão do processo de inicialização, você pode acessar o projeto em http://localhost:5095 no seu navegador.
+Após a conclusão do processo de inicialização, você pode acessar o projeto em http://localhost:5095 no seu navegador para visualizar o Manager.
