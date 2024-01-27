@@ -4,7 +4,10 @@ import requests
 import threading
 import time
 import os
-from DT.Common import MonitoringProject
+
+import sys
+sys.path.append('../')
+from DT.common.MonitoringProject import MonitoringProject
 
 
 class Collector:
@@ -14,11 +17,12 @@ class Collector:
 
         Parameters:
             global_count (int): Integer starting at 0.
-            manager_url (str): URL for the Manager container with Flask.
+            manager_url (str): URL for the manager container with Flask.
         """
         self.project_list = []  # Initialize an empty list
         self.global_count = global_count
-        self.manager_url = os.getenv("URL_MANAGER", "http://manager:5095")
+        # self.manager_url = os.getenv("URL_MANAGER", "http://manager:5095")
+        self.manager_url = os.getenv("URL_MANAGER", "http://localhost:5000")
 
 
         # Call get_project_list to initialize the project_list within the max of 10 retries.
@@ -116,13 +120,13 @@ class Collector:
 
     def post_data(self, data):
         """
-        Send the collected data to the Manager container ("/receive_data_from_collector" route).
+        Send the collected data to the manager container ("/receive_data_from_collector" route).
 
         Parameters:
             data: The collected data.
         """
         response = requests.post(f"{self.manager_url}/receive_data_from_collector", json=data)
         if response.status_code == 200:
-            print("Data posted to Manager successfully.")
+            print("Data posted to manager successfully.")
         else:
-            print(f"Error posting data to Manager. Status code: {response.status_code}")
+            print(f"Error posting data to manager. Status code: {response.status_code}")
