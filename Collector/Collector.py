@@ -5,6 +5,7 @@ import threading
 import time
 from DT.Common import MonitoringProject
 
+
 class Collector:
     def __init__(self, global_count=0, manager_url="http://manager-container:5000"):
         """
@@ -52,18 +53,20 @@ class Collector:
         self.stop_data_collection.set()
         self.data_collection_thread.join()
 
-    def get_project_list(self):        #TODO: modificar para criar instâncias de DataSource e de Monitoring Project
+    def get_project_list(self):
         """
         Retrieve the projects from another container with Flask ("/get_active_projects" route).
         """
         response = requests.get(f"{self.manager_url}/get_active_projects")
         if response.status_code == 200:
-            self.project_list = response.json()
-            print("Project list updated successfully.")
+            mp_dicts_list = response.json()
+
+            self.project_list = [MonitoringProject(**mp_dict) for mp_dict in mp_dicts_list]
+
         else:
             print(f"Error updating project list. Status code: {response.status_code}")
 
-    def update_project_list(self, flag, project_id): #TODO: modificar para criar instâncias de DataSource e de Monitoring Project
+    def update_project_list(self, flag, project_id, mp_dict):
         """
         Update the project_list based on the given flag.
 
@@ -73,18 +76,17 @@ class Collector:
         """
         match flag:
             case 1:
-                self.project_list.append(MonitoringProject(project_id))
+                self.project_list.append(MonitoringProject(**mp_dict))
             case 2:
-                if project_id in self.project_list:
-                    self.project_list.remove(project)
+                self.project_list = [project for project in self.project_list if project.project_id != project_id]
             case 3:
                 for i, existing_project in enumerate(self.project_list):
-                    if existing_project.id == project.id:
-                        self.project_list[i] = project
+                    if existing_project.project_id == project_id:
+                        updated_project = MonitoringProject(**mp_dict)
+                        self.project_list[i] = updated_project
                         break
             case _:
                 print(f"Error updating project list. Status code: {response}")
-
 
     def collect_data(self):
         """

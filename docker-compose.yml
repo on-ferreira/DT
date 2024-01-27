@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  db-DT:
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: DTsistemas
+      POSTGRES_USER: DTuser
+      POSTGRES_PASSWORD: DTuser
+      TZ: "America/Sao_Paulo"
+    container_name: db-DT
+    volumes:
+      -
+
+  manager:
+    build:
+      context: ./
+      dockerfile: Manager/Dockerfile
+    command: >
+      sh -c "python app.py"
+    ports:
+      - 5095:5095
+    volumes:
+      - .
+    environment:
+
+    depends_on:
+      - db-DT
+    container_name: Manager
+
+  collector:
+    build:
+      context: ./
+      dockerfile: Collector/Dockerfile
+    command: >
+      sh -c "python app.py"
+    ports:
+      - 5096:5096
+    volumes:
+      - ./Collector
+      - ./data/web:/vol/web
+    environment:
+      TZ: "America/Sao_Paulo"
+      URL_MANAGER: "${URL_MANAGER}"
+      PYTHONUNBUFFERED: 1
+    depends_on:
+      - db-DT
+      - Manager
+    container_name: Collector
+
+
+
+  sintese:
+    image: sintese
+    build:
+      context: ./
+      dockerfile: sintese/Dockerfile
+    command: ./run_create_admin.sh
+    environment:
+      TZ: "America/Sao_Paulo"
+      URL_ANALISE: "${URL_ANALISE}"
+      VUE_APP_URL: "${VUE_APP_MONITOR_URL}"
+      PYTHONUNBUFFERED: 1
+    restart: always
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    container_name: sintese
+
+
+
+  consulta_rto:
+    image: consulta_rto
+    container_name: consulta_rto
+    build:
+      context: consulta_rto
+      dockerfile: Dockerfile
+
+    command: ./roda_simulador.sh
+    environment:
+      TZ: "America/Sao_Paulo"
+      URL_SINTESE: "${URL_SINTESE}"
+      PYTHONUNBUFFERED: 1
+    restart: always
+    ports:
+      - "5004:5000"
+    depends_on:
+      - populabanco_rto
+      - sintese
+    extra_hosts:
+      - "localhost:192.168.5.94"
+

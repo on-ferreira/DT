@@ -1,6 +1,8 @@
 import requests
+from abc import ABC, abstractmethod
 
-class DataSource:
+
+class DataSource(ABC):
     def __init__(self, source, tags=[]):
         """
         Constructor for the DataSource class.
@@ -19,6 +21,7 @@ class DataSource:
         print(f"Source: {self.source}")
         print(f"Tags: {self.tags}")
 
+    @abstractmethod
     def get_data(self):
         """
         Abstract method that must be implemented by child classes.
@@ -66,6 +69,15 @@ class DataSource:
                       "Use 2 for removing a tag from tags."
                       "Use 3 for updating a tag from tags")
 
+    @abstractmethod
+    def to_dict(self):
+        """
+        Abstract method that must be implemented by child classes.
+        Raises:
+            NotImplementedError: To enforce implementation in child classes.
+        """
+        raise NotImplementedError("to_dict() method must be implemented in child classes.")
+
 
 class DatabaseDataSource(DataSource):
     def __init__(self, source, tags=[], proj_id=None, connection_string=None):
@@ -94,6 +106,11 @@ class DatabaseDataSource(DataSource):
         # Use self.connection_string to establish a connection
         # Return the data or perform any necessary actions
 
+    def to_dict(self):
+        return {'type': 'DatabaseDataSource',
+                "source": self.source, "tags": self.tags, "proj_id": self.proj_id,
+                "connection_string": self.connection_string}
+
 
 class ExcelDataSource(DataSource):
     def __init__(self, source, tags=[]):
@@ -117,6 +134,10 @@ class ExcelDataSource(DataSource):
         # Implement here the specific logic for reading data from an Excel file
         # Use self.sheet_name to specify the sheet
         # Return the data or perform any necessary actions
+
+    def to_dict(self):
+        return {'type': 'ExcelDataSource',
+                "source": self.source, "tags": self.tags}
 
 
 class ExternalDataSource(DataSource):
@@ -147,3 +168,7 @@ class ExternalDataSource(DataSource):
         else:
             print(f"Error: Unable to fetch data. Status code: {response.status_code}")
             return None
+
+    def to_dict(self):
+        return {'type': 'ExternalDataSource',
+                "source": self.source, "tags": self.tags}
