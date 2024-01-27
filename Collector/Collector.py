@@ -52,7 +52,7 @@ class Collector:
         self.stop_data_collection.set()
         self.data_collection_thread.join()
 
-    def get_project_list(self):
+    def get_project_list(self):        #TODO: modificar para criar instâncias de DataSource e de Monitoring Project
         """
         Retrieve the projects from another container with Flask ("/get_active_projects" route).
         """
@@ -63,7 +63,7 @@ class Collector:
         else:
             print(f"Error updating project list. Status code: {response.status_code}")
 
-    def update_project_list(self, flag, project_id):
+    def update_project_list(self, flag, project_id): #TODO: modificar para criar instâncias de DataSource e de Monitoring Project
         """
         Update the project_list based on the given flag.
 
