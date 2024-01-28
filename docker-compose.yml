@@ -10,8 +10,7 @@ services:
       POSTGRES_PASSWORD: DTuser
       TZ: "America/Sao_Paulo"
     container_name: db-DT
-    volumes:
-      -
+
 
   manager:
     build:
@@ -21,10 +20,6 @@ services:
       sh -c "python app.py"
     ports:
       - 5095:5095
-    volumes:
-      - .
-    environment:
-
     depends_on:
       - db-DT
     container_name: manager
@@ -37,9 +32,6 @@ services:
       sh -c "python app.py"
     ports:
       - 5096:5096
-    volumes:
-      - ./collector
-      - ./data/web:/vol/web
     environment:
       TZ: "America/Sao_Paulo"
       URL_MANAGER: "http://manager:5095"
