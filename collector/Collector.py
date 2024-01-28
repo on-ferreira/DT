@@ -67,6 +67,8 @@ class Collector:
         if response.status_code == 200:
             mp_dicts_list = response.json()
 
+            print( mp_dicts_list )
+
             self.project_list = [MonitoringProject(**mp_dict) for mp_dict in mp_dicts_list]
 
         else:

@@ -1,36 +1,38 @@
 # Use a base Python image with Alpine Linux
+FROM python:3.11.7-alpine3.18 AS builder
+
+# Copy the requirements file into the container at /app
+COPY /manager/requirements_manager.txt /DT/requirements.txt
+
+# Install dependencies
+RUN python -m venv /py \
+    && /py/bin/pip install --upgrade pip \
+    && apk add --update --no-cache postgresql-dev \
+    && /py/bin/pip install -r /DT/requirements.txt
+
+
+# Stage 2: Create Final Image
 FROM python:3.11.7-alpine3.18
 
 LABEL maintainer="DTsistemas"
 
 ENV PYTHONBUFFERED 1
 
-# Set the working directory to /app
-WORKDIR /app
+COPY --from=builder /py /py
+COPY ./common /DT/common
+COPY ./manager /DT/manager
 
-# Copy the requirements file into the container at /app
-COPY /manager/requirements_manager.txt /app/requirements.txt
+WORKDIR /DT
+EXPOSE 5095
 
-# Install dependencies
-RUN python -m venv /py \
-    && /py/bin/pip install --upgrade pip \
-    && apk add --update --no-cache postgresql-dev \
-    && /py/bin/pip install -r /app/requirements.txt
+ENV PATH="/py/bin:$PATH"
 
-# Copy the content from DT/common into the container at /app/DT/common
-COPY common /app/common
+USER root
 
-# Copy the contents of the collector module into the container at /app/DT/collector
-COPY manager /app/manager
+RUN adduser --disabled-password --no-create-home DTuser \
+    && mkdir -p /vol/web/static \
+    && mkdir -p /vol/web/media \
+    && chown -R DTuser:DTuser /vol \
+    && chmod -R 755 /vol
 
-# Set the working directory to /app/DT/collector
-WORKDIR /app/manager
-
-# Create a non-root user for running the application
-RUN adduser --disabled-password --no-create-home DTuser && \
-    chown -R DTuser:DTuser /app  && \
-    chmod -R 755 /app
-
-# Switch to the non-root user
 USER DTuser
-

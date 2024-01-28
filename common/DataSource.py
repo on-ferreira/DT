@@ -80,7 +80,7 @@ class DataSource(ABC):
 
 
 class DatabaseDataSource(DataSource):
-    def __init__(self, source, tags=[], proj_id=None, connection_string=None):
+    def __init__(self, type, source, tags=[], proj_id=None, connection_string=None):
         """
         Constructor for the DatabaseDataSource class.
 
@@ -93,6 +93,8 @@ class DatabaseDataSource(DataSource):
         super().__init__(source, tags)
         self.proj_id = proj_id
         self.connection_string = connection_string
+        self.type = type
+
 
     def get_data(self):
         """
@@ -107,13 +109,13 @@ class DatabaseDataSource(DataSource):
         # Return the data or perform any necessary actions
 
     def to_dict(self):
-        return {'type': 'DatabaseDataSource',
+        return {'type': self.type,
                 "source": self.source, "tags": self.tags, "proj_id": self.proj_id,
                 "connection_string": self.connection_string}
 
 
 class ExcelDataSource(DataSource):
-    def __init__(self, source, tags=[]):
+    def __init__(self, type, source, tags=[]):
         """
         Constructor for the ExcelDataSource class.
 
@@ -122,6 +124,7 @@ class ExcelDataSource(DataSource):
             tags (list): List of tags associated with the data (default is an empty list).
         """
         super().__init__(source, tags)
+        self.type = type
 
     def get_data(self):
         """
@@ -136,12 +139,12 @@ class ExcelDataSource(DataSource):
         # Return the data or perform any necessary actions
 
     def to_dict(self):
-        return {'type': 'ExcelDataSource',
+        return {'type': self.type,
                 "source": self.source, "tags": self.tags}
 
 
 class ExternalDataSource(DataSource):
-    def __init__(self, source, tags=[]):
+    def __init__(self, type, source, tags=[]):
         """
         Constructor for the ExternalDataSource class.
 
@@ -150,6 +153,7 @@ class ExternalDataSource(DataSource):
             tags (list): List of tags associated with the data (default is an empty list).
         """
         super().__init__(source, tags)
+        self.type = type
 
     def get_data(self):
         """
@@ -170,5 +174,5 @@ class ExternalDataSource(DataSource):
             return None
 
     def to_dict(self):
-        return {'type': 'ExternalDataSource',
+        return {'type': self.type,
                 "source": self.source, "tags": self.tags}
