@@ -33,4 +33,4 @@ Este comando irá construir as imagens necessárias e iniciar dois containers: u
 
 ## Acesso ao Projeto:
 
-Após a conclusão do processo de inicialização, você pode acessar o projeto em http://localhost:5095 no seu navegador para visualizar o Manager.
+Após a conclusão do processo de inicialização, você pode acessar o projeto em http://localhost:5095 no seu navegador para visualizar o manager.

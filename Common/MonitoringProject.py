@@ -1,4 +1,4 @@
-from DataSource import DataSource, DatabaseDataSource, ExternalDataSource, ExcelDataSource
+from DT.common.DataSource import DataSource, DatabaseDataSource, ExternalDataSource, ExcelDataSource
 
 
 class MonitoringProject:

@@ -9,7 +9,7 @@ ENV PYTHONBUFFERED 1
 WORKDIR /app
 
 # Copy the requirements file into the container at /app
-COPY ./DT/Collector/requirements_manager.txt /app/requirements.txt
+COPY ./DT/collector/requirements_manager.txt /app/requirements.txt
 
 # Install dependencies
 RUN apk add --update --no-cache postgresql-dev \
@@ -17,14 +17,14 @@ RUN apk add --update --no-cache postgresql-dev \
     && /venv/bin/pip install --upgrade pip \
     && /venv/bin/pip install -r /app/requirements.txt
 
-# Copy the content from DT/Common into the container at /app/DT/Common
-COPY ./DT/Common /app/DT/Common
+# Copy the content from DT/common into the container at /app/DT/common
+COPY ./DT/common /app/DT/common
 
-# Copy the contents of the Collector module into the container at /app/DT/Collector
-COPY ./DT/Manager /app/DT/Manager
+# Copy the contents of the collector module into the container at /app/DT/collector
+COPY ./DT/manager /app/DT/manager
 
-# Set the working directory to /app/DT/Collector
-WORKDIR /app/DT/Manager
+# Set the working directory to /app/DT/collector
+WORKDIR /app/DT/manager
 
 # Create a non-root user for running the application
 RUN adduser --disabled-password --no-create-home DTuser && \
