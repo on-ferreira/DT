@@ -1,14 +1,16 @@
 from flask import Flask
 from blueprints.manager_bp import manager_bp
-
-# maybe will be used later
-# from datetime import datetime
-# from datetime import timedelta
-# from datetime import timezone
+import sys
+sys.path.append('../')
+from DT.common.db.db_setup import db
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://DTuser:DTuser@db-DT/DTsistemas'
+db.init_app(app)
+
 app.register_blueprint(manager_bp)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5095)
-
+    with app.app_context():
+        db.create_all()
+    app.run(host='0.0.0.0', port=5095, debug=True)

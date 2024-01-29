@@ -6,6 +6,7 @@ import time
 import os
 
 import sys
+
 sys.path.append('../')
 from DT.common.MonitoringProject import MonitoringProject
 
@@ -21,11 +22,8 @@ class Collector:
         """
         self.project_list = []  # Initialize an empty list
         self.global_count = global_count
-        # self.manager_url = os.getenv("URL_MANAGER", "http://manager:5095")
         self.manager_url = os.getenv("URL_MANAGER", "http://localhost:5000")
 
-
-        # Call get_project_list to initialize the project_list within the max of 10 retries.
         max_retries = 10
         for retry_count in range(1, max_retries + 1):
             try:
@@ -37,17 +35,18 @@ class Collector:
         else:
             raise RuntimeError(f"Unable to retrieve project list after {max_retries} attempts. Aborting application.")
 
-        # Set up a flag for stopping the periodic data collection
+        print("Before Threading . Event()")
         self.stop_data_collection = threading.Event()
-
-        # Start a separate thread for periodic data collection
+        print("Before Threading . Thread()")
         self.data_collection_thread = threading.Thread(target=self._periodic_data_collection)
+        print("Before Thread start")
         self.data_collection_thread.start()
 
     def _periodic_data_collection(self):
         """
         Periodically call collect_data every 15 seconds in a separate thread.
         """
+        print("_periodic_data_collection")
         while not self.stop_data_collection.is_set():
             self.collect_data()
             time.sleep(15)
@@ -67,7 +66,7 @@ class Collector:
         if response.status_code == 200:
             mp_dicts_list = response.json()
 
-            print( mp_dicts_list )
+            print(mp_dicts_list)
 
             self.project_list = [MonitoringProject(**mp_dict) for mp_dict in mp_dicts_list]
 
@@ -101,7 +100,7 @@ class Collector:
         Loop through the project_list, calling get_data() for all DataSources in data.
         """
         processes = []
-
+        print(f"collect_data - {self.project_list}")
         for project in self.project_list:
             for data_source in project.data:
                 process = threading.Thread(target=self._collect_data_for_source, args=(data_source,))
@@ -117,8 +116,12 @@ class Collector:
         """
         Helper method to call get_data() for a specific DataSource.
         """
-        data = data_source.get_data()
-        self.post_data(data)
+        try:
+            print(f"collect_data_for_source - {data_source}")
+            data = data_source.get_data()
+            self.post_data(data)
+        except Exception as e:
+            print(f"Error in _collect_data_for_source: {e}")
 
     def post_data(self, data):
         """
@@ -127,6 +130,7 @@ class Collector:
         Parameters:
             data: The collected data.
         """
+        print(f"post_data - {data}")
         response = requests.post(f"{self.manager_url}/receive_data_from_collector", json=data)
         if response.status_code == 200:
             print("Data posted to manager successfully.")
