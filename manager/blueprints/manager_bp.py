@@ -13,8 +13,8 @@ def get_active_projects():
     # You can use the Manager class or a database connection here
     active_projects = manager_instance.get_active_projects() or [
         {"project_id": 1, "data": [{'type': 'ExternalDataSource',
-                                    "source": "www.google.com",
-                                    "tags": ["tag1", "tag2"]}]}]
+                                    "source": "http://worldtimeapi.org/api/timezone/America/Sao_Paulo",
+                                    "tags": ["utc_datetime", "unixtime"]}]}]
 
     return jsonify(active_projects)
 

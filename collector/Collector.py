@@ -9,6 +9,7 @@ import sys
 
 sys.path.append('../')
 from DT.common.MonitoringProject import MonitoringProject
+from DT.common.DataSource import DataSource
 
 
 class Collector:
@@ -35,18 +36,14 @@ class Collector:
         else:
             raise RuntimeError(f"Unable to retrieve project list after {max_retries} attempts. Aborting application.")
 
-        print("Before Threading . Event()")
         self.stop_data_collection = threading.Event()
-        print("Before Threading . Thread()")
         self.data_collection_thread = threading.Thread(target=self._periodic_data_collection)
-        print("Before Thread start")
         self.data_collection_thread.start()
 
     def _periodic_data_collection(self):
         """
         Periodically call collect_data every 15 seconds in a separate thread.
         """
-        print("_periodic_data_collection")
         while not self.stop_data_collection.is_set():
             self.collect_data()
             time.sleep(15)
@@ -100,7 +97,6 @@ class Collector:
         Loop through the project_list, calling get_data() for all DataSources in data.
         """
         processes = []
-        print(f"collect_data - {self.project_list}")
         for project in self.project_list:
             for data_source in project.data:
                 process = threading.Thread(target=self._collect_data_for_source, args=(data_source,))
@@ -117,9 +113,9 @@ class Collector:
         Helper method to call get_data() for a specific DataSource.
         """
         try:
-            print(f"collect_data_for_source - {data_source}")
-            data = data_source.get_data()
-            self.post_data(data)
+            if (isinstance(data_source, DataSource)):
+                data = data_source.get_data()
+                self.post_data(data)
         except Exception as e:
             print(f"Error in _collect_data_for_source: {e}")
 

@@ -6,8 +6,8 @@ class MonitoringProject:
         self.project_id = project_id
         self.data = data or []
         if data:
-            for data_source in data:
-                self.add_data_source(data_source)
+            for i in range(len(data)):
+                self.add_data_source(data[i])
 
     def add_data_source(self, data_source):
         """
@@ -20,7 +20,6 @@ class MonitoringProject:
             self.data.append(data_source)
         elif isinstance(data_source, dict):
             data_source_type = data_source.get('type', None)
-
             match data_source_type:
                 case 'DatabaseDataSource':
                     self.data.append(DatabaseDataSource(**data_source))

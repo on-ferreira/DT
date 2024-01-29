@@ -1,3 +1,5 @@
+from flask import jsonify
+
 class Manager:
     def __init__(self):
         """
@@ -9,6 +11,13 @@ class Manager:
         Retrieve the active projects from the database.
         """
         pass
+
+    def receive_data_from_collector(self):
+        """
+        Process and save the data from the collector in the database
+        :return: Status 200
+        """
+        return jsonify({"status": "success"}), 200
 
     def get_all_projects():
         """
