@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
-from db_setup import Base
+from DT.common.db.db_setup import Base
 
 class Project(Base):
     __tablename__ = 'projects'

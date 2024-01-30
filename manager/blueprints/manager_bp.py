@@ -1,6 +1,10 @@
 from flask import Blueprint, jsonify, request
 from Manager import Manager
 
+import sys
+sys.path.append('../')
+from DT.common.db.models import Project, DataSource
+
 manager_bp = Blueprint('manager', __name__)
 manager_instance = Manager()
 

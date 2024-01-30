@@ -1,8 +1,10 @@
 from flask import Flask
 from blueprints.manager_bp import manager_bp
+
 import sys
 sys.path.append('../')
 from DT.common.db.db_setup import db
+sys.path.append('manager')
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://DTuser:DTuser@db-DT/DTsistemas'
