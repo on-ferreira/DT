@@ -23,7 +23,7 @@ COPY ./common /DT/common
 COPY ./collector /DT/collector
 
 WORKDIR /DT
-EXPOSE 5095
+EXPOSE 5096
 
 ENV PATH="/py/bin:$PATH"
 

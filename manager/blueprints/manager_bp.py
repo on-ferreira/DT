@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from Manager import Manager
 
 manager_bp = Blueprint('manager', __name__)
@@ -24,4 +24,13 @@ def receive_data_from_collector():
     """
     Receive data from Collector and save in the database.
     """
-    return manager_instance.receive_data_from_collector()
+    
+    try:
+        # data = request.json
+        result = manager_instance.receive_data_from_collector()
+
+        return result
+
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
