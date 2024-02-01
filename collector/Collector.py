@@ -40,13 +40,13 @@ class Collector:
         self.data_collection_thread = threading.Thread(target=self._periodic_data_collection)
         self.data_collection_thread.start()
 
-    def _periodic_data_collection(self):
+    def _periodic_data_collection(self, X=30):
         """
-        Periodically call collect_data every 15 seconds in a separate thread.
+        Periodically call collect_data every 'X' seconds in a separate thread.
         """
         while not self.stop_data_collection.is_set():
             self.collect_data()
-            time.sleep(15)
+            time.sleep(X)
 
     def stop_periodic_data_collection(self):
         """
@@ -115,6 +115,7 @@ class Collector:
         try:
             if (isinstance(data_source, DataSource)):
                 data = data_source.get_data()
+                data["project_id"] = data_source.get_project_id()
                 self.post_data(data)
         except Exception as e:
             print(f"Error in _collect_data_for_source: {e}")

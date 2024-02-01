@@ -1,9 +1,10 @@
 import requests
+import json
 from abc import ABC, abstractmethod
 
 
 class DataSource(ABC):
-    def __init__(self, source, tags=[]):
+    def __init__(self, source, project_id, tags=[]):
         """
         Constructor for the DataSource class.
 
@@ -12,6 +13,7 @@ class DataSource(ABC):
             tags (list): List of tags associated with the data (default is an empty list).
         """
         self.source = source
+        self.project_id = project_id
         self.tags = tags
 
     def display_info(self):
@@ -29,6 +31,12 @@ class DataSource(ABC):
             NotImplementedError: To enforce implementation in child classes.
         """
         raise NotImplementedError("get_data() method must be implemented in child classes.")
+
+    def get_project_id(self):
+        """
+        Method that returns the project ID
+        """
+        return self.project_id
 
     def edit_source(self, new_source):
         """
@@ -80,7 +88,7 @@ class DataSource(ABC):
 
 
 class DatabaseDataSource(DataSource):
-    def __init__(self, type, source, tags=[], proj_id=None, connection_string=None):
+    def __init__(self, type, source, project_id=None, tags=[], connection_string=None):
         """
         Constructor for the DatabaseDataSource class.
 
@@ -90,8 +98,7 @@ class DatabaseDataSource(DataSource):
             proj_id (any): Identifier for the associated project.
             connection_string (str): Connection string for the database.
         """
-        super().__init__(source, tags)
-        self.proj_id = proj_id
+        super().__init__(source, project_id, tags)
         self.connection_string = connection_string
         self.type = type
 
@@ -110,12 +117,12 @@ class DatabaseDataSource(DataSource):
 
     def to_dict(self):
         return {'type': self.type,
-                "source": self.source, "tags": self.tags, "proj_id": self.proj_id,
+                "source": self.source, "tags": self.tags, "project_id": self.project_id,
                 "connection_string": self.connection_string}
 
 
 class ExcelDataSource(DataSource):
-    def __init__(self, type, source, tags=[]):
+    def __init__(self, type, source, project_id=None, tags=[]):
         """
         Constructor for the ExcelDataSource class.
 
@@ -123,7 +130,7 @@ class ExcelDataSource(DataSource):
             source (str): The source of the data.
             tags (list): List of tags associated with the data (default is an empty list).
         """
-        super().__init__(source, tags)
+        super().__init__(source, project_id, tags)
         self.type = type
 
     def get_data(self):
@@ -140,11 +147,11 @@ class ExcelDataSource(DataSource):
 
     def to_dict(self):
         return {'type': self.type,
-                "source": self.source, "tags": self.tags}
+                "source": self.source, "tags": self.tags, "project_id": self.project_id}
 
 
 class ExternalDataSource(DataSource):
-    def __init__(self, type, source, tags=[]):
+    def __init__(self, type, source, project_id=None, tags=[]):
         """
         Constructor for the ExternalDataSource class.
 
@@ -152,7 +159,7 @@ class ExternalDataSource(DataSource):
             source (str): The source of the data.
             tags (list): List of tags associated with the data (default is an empty list).
         """
-        super().__init__(source, tags)
+        super().__init__(source, project_id, tags)
         self.type = type
 
     def get_data(self):
@@ -163,16 +170,16 @@ class ExternalDataSource(DataSource):
             The fetched data if successful; otherwise, prints an error message and returns None.
         """
         print(f"Fetching data from external source using API: {self.source}")
-        # Implement here the specific logic for making a request to an external API
-        # Use self.api_url to specify the API endpoint
         response = requests.get(self.source)
         if response.status_code == 200:
-            data = response.json()  # Assuming the response is in JSON format
-            return data
+            data = response.json()
+            filtered_data = {tag: data[tag] for tag in data if tag in self.tags}
+
+            return filtered_data
         else:
             print(f"Error: Unable to fetch data. Status code: {response.status_code}")
             return None
 
     def to_dict(self):
         return {'type': self.type,
-                "source": self.source, "tags": self.tags}
+                "source": self.source, "tags": self.tags, "project_id": self.project_id}
