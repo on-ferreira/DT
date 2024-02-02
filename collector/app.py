@@ -1,8 +1,8 @@
-from Collector import Collector
+from Collector import DTCollector
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
-collector_instance = Collector()
+collector_instance = DTCollector()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5096, debug=True)

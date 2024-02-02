@@ -1,4 +1,5 @@
 from urllib import response
+from abc import ABC, abstractmethod
 
 import requests
 import threading
@@ -12,18 +13,80 @@ from DT.common.MonitoringProject import MonitoringProject
 from DT.common.DataSource import DataSource
 
 
-class Collector:
-    def __init__(self, global_count=0):
+class Collector(ABC):
+    def __init__(self, project_list, global_count, manager_url):
         """
-        Constructor for the Collector class.
+          Constructor for the Collector class.
+
+          Parameters:
+              project_list (list<MonitoringProject>): List of active projects
+              global_count (int): Integer starting at 0.
+              manager_url (str): URL for the manager container with Flask.
+        """
+        self.project_list = project_list
+        self.global_count = global_count
+        self.manager_url = manager_url
+
+    @abstractmethod
+    def _periodic_data_collection(self, X):
+        """
+        Periodically call collect_data every 'X' seconds in a separate thread.
+        """
+        pass
+
+    @abstractmethod
+    def stop_periodic_data_collection(self):
+        """
+        Stop the periodic data collection thread.
+        """
+        pass
+
+    @abstractmethod
+    def get_project_list(self):
+        """
+        Retrieve the projects from another container with Flask ("/get_active_projects" route).
+        """
+        pass
+
+    @abstractmethod
+    def update_project_list(self, flag, project_id, mp_dict):
+        """
+        Update the project_list based on the given flag.
 
         Parameters:
-            global_count (int): Integer starting at 0.
-            manager_url (str): URL for the manager container with Flask.
+            flag (int): Flag indicating the operation (1 for insertion, 2 for deletion, 3 for update).
+            project: The project to be inserted, deleted, or updated.
         """
-        self.project_list = []  # Initialize an empty list
-        self.global_count = global_count
-        self.manager_url = os.getenv("URL_MANAGER", "http://localhost:5000")
+        pass
+
+    @abstractmethod
+    def collect_data(self):
+        """
+        Loop through the project_list, calling get_data() for all DataSources in data.
+        """
+        pass
+
+    @abstractmethod
+    def _collect_data_for_source(self, data_source):
+        """
+        Helper method to call get_data() for a specific DataSource.
+        """
+        pass
+
+    @abstractmethod
+    def post_data(self, data):
+        """
+        Send the collected data to the manager container ("/receive_data_from_collector" route).
+
+        Parameters:
+            data: The collected data.
+        """
+        pass
+
+
+class DTCollector(Collector):
+    def __init__(self):
+        super().__init__(project_list=[], global_count=0, manager_url=os.getenv("URL_MANAGER", "http://localhost:5000"))
 
         max_retries = 10
         for retry_count in range(1, max_retries + 1):
@@ -41,24 +104,15 @@ class Collector:
         self.data_collection_thread.start()
 
     def _periodic_data_collection(self, X=30):
-        """
-        Periodically call collect_data every 'X' seconds in a separate thread.
-        """
         while not self.stop_data_collection.is_set():
             self.collect_data()
             time.sleep(X)
 
     def stop_periodic_data_collection(self):
-        """
-        Stop the periodic data collection thread.
-        """
         self.stop_data_collection.set()
         self.data_collection_thread.join()
 
     def get_project_list(self):
-        """
-        Retrieve the projects from another container with Flask ("/get_active_projects" route).
-        """
         response = requests.get(f"{self.manager_url}/get_active_projects")
         if response.status_code == 200:
             mp_dicts_list = response.json()
@@ -71,13 +125,6 @@ class Collector:
             print(f"Error updating project list. Status code: {response.status_code}")
 
     def update_project_list(self, flag, project_id, mp_dict):
-        """
-        Update the project_list based on the given flag.
-
-        Parameters:
-            flag (int): Flag indicating the operation (1 for insertion, 2 for deletion, 3 for update).
-            project: The project to be inserted, deleted, or updated.
-        """
         match flag:
             case 1:
                 self.project_list.append(MonitoringProject(**mp_dict))
@@ -93,9 +140,6 @@ class Collector:
                 print(f"Error updating project list. Status code: {response}")
 
     def collect_data(self):
-        """
-        Loop through the project_list, calling get_data() for all DataSources in data.
-        """
         processes = []
         for project in self.project_list:
             for data_source in project.data:
@@ -109,9 +153,6 @@ class Collector:
             process.join()
 
     def _collect_data_for_source(self, data_source):
-        """
-        Helper method to call get_data() for a specific DataSource.
-        """
         try:
             if (isinstance(data_source, DataSource)):
                 data = data_source.get_data()
@@ -121,12 +162,6 @@ class Collector:
             print(f"Error in _collect_data_for_source: {e}")
 
     def post_data(self, data):
-        """
-        Send the collected data to the manager container ("/receive_data_from_collector" route).
-
-        Parameters:
-            data: The collected data.
-        """
         print(f"post_data - {data}")
         response = requests.post(f"{self.manager_url}/receive_data_from_collector", json=data)
         if response.status_code == 200:
