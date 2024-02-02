@@ -102,7 +102,6 @@ class DatabaseDataSource(DataSource):
         self.connection_string = connection_string
         self.type = type
 
-
     def get_data(self):
         """
         Queries data from the database specified in the connection_string within the project specified by proj_id.
